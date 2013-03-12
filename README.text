@@ -48,4 +48,19 @@ We are formatting user request parameters in predictArgs:
 				.get("brandsafe"));
 		predictArgs.put("Brandsafe_Id", campaignBrandsafeId);
 
-		// Impression:1 and clicks:0
+		predictArgs.put("predict_id", predictId);
+		predictArgs.put("impression", 1);
+		predictArgs.put("click", 0);
+
+		// System.out.println("Predict Id : " + predictId);
+		long startTime = System.nanoTime();
+		LOG.info("Trace adsearch module :: time before predict(jubatrecommendersearch) :: "+startTime);
+		StringBuffer JubatusKey = new StringBuffer();
+
+		JubatusKey.append(hourId).append("_").append(dayId).append("_").append(((regionCode == null || regionCode.isEmpty()) ? "ZZ" : regionCode)).append("_").append(((countryCode == null || countryCode.isEmpty()) ? "ZZ" : countryCode))
+		.append("_").append(((locId == null || locId.isEmpty() || locId.equalsIgnoreCase("NULL")) ? ZERO_INT : Integer.parseInt(locId))).append("_").append(((carrierId == null || carrierId.isEmpty()) ? ZERO_INT : Integer.parseInt(carrierId)))
+		.append("_").append(wifiEnabledId).append("_").append(((deviceId == null || deviceId.isEmpty() || deviceId.equalsIgnoreCase("NULL")) ? ZERO_INT : Integer.parseInt(deviceId))).append("_")
+		.append(Integer.valueOf(adDetail.get("ad_id"))).append("_").append(clientId).append("_").append(campaignBrandsafeId).append("_").append(predictId);
+
+		predictArgs.put("predictKey", JubatusKey);
+		predictArgs.put("tempAdsList", tempAdsListString);
