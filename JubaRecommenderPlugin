@@ -1,1 +1,167 @@
-PredictArgs hashmap will be sent to this class to format 
+PredictArgs hashmap will be sent to this class > method 'loadData' to format and request to jubareommender for weightage
+
+
+package org.zestadz.adsearch.server.predict;
+//package us.jubat.example.gender;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import org.apache.commons.configuration.Configuration;
+import org.apache.log4j.Logger;
+import org.mortbay.log.Log;
+import org.zestadz.adsearch.server.data.CacheDataPlugin;
+
+import com.ms134.pservice.pcache.PCache;
+import com.ms134.pservice.pcache.PCacheException;
+import com.ms134.pservice.pcache.PKey;
+
+import us.jubat.recommender.Datum;
+import us.jubat.recommender.RecommenderClient;
+import us.jubat.recommender.TupleStringDouble;
+import us.jubat.recommender.TupleStringFloat;
+import us.jubat.recommender.TupleStringString;
+
+public class JubatusRecommenderPlugin extends CacheDataPlugin<Double> {
+  String host = "192.168.1.38";
+	int port = 9181;
+	String name = "JubaRecommenderTest";
+	long refreshRate;
+	int predictId;
+	Configuration conf;
+	RecommenderClient recommerderClient;
+	List<String> rows;
+	
+	private static final Logger LOG = Logger.getLogger(JubatusRecommenderPlugin.class);
+	
+	public void configure(Configuration conf) {
+		this.conf = conf;
+		try {
+			recommerderClient = new RecommenderClient(host, port, 5);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
+	public void refresh() throws IOException {
+		try {
+//			rows = recommerderClient.get_all_rows(name);
+		} catch (PCacheException e) {
+			IOException rte = new IOException(e);
+			rte.setStackTrace(e.getStackTrace());
+			throw rte;
+		}
+
+
+	}
+	
+	@Override
+	public void stop() {
+		// close all predict resources
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public final Double loadData(Object... arg) {
+
+		Map<String, Object> pcacheArgs = (HashMap<String, Object>) arg[0];
+//		int predictId = (Integer) pcacheArgs.get("predict_id");
+
+		Datum d = new Datum();
+		d.string_values = new ArrayList<TupleStringString>();
+		d.num_values = new ArrayList<TupleStringDouble>();
+		
+		ArrayList<Datum> testData = new ArrayList<Datum>();
+		Datum predictDatum = makeDatumArray(pcacheArgs.entrySet());
+//		Log.info("Data is here...."+predictDatum.string_values);
+		// this is the key to search predict for
+		double prob = 0;
+		try {
+
+			Datum result = recommerderClient.complete_row_from_id(name, pcacheArgs.get("predictKey").toString());		
+			pcacheArgs.get("tempAdsList");
+			Map<String, Double> temp = new HashMap<String, Double>();
+			ArrayList<String> sortAdsString = new ArrayList<String>();
+			ArrayList<Double> sortAdsDetails = new ArrayList<Double>();
+			LOG.info("****Reommender Results ******"+result.num_values.size());
+						
+			for (TupleStringDouble tuple : result.num_values) {
+				LOG.info("****Reommender Result ****** - "+tuple.first + " (" + tuple.second + "), ");
+				sortAdsString.add(tuple.first);
+				sortAdsDetails.add((double) tuple.second);
+				temp.put(tuple.first, (double)tuple.second);
+			}
+			try{
+				prob = Collections.max(temp.values());
+				for (int i=0;i<sortAdsString.size(); i++)
+				{
+					LOG.info(prob+"  ------------------------  "+sortAdsDetails.get(i).equals(prob));
+					if (sortAdsDetails.get(i).equals(prob))
+					{
+						TupleStringDouble tuple1 = new TupleStringDouble();
+						tuple1.first = sortAdsString.get(i);
+//						tuple1.second = 0;
+						LOG.info("  ------------------------ before  "+tuple1.second);
+						tuple1.second = sortAdsDetails.get(i)+1;
+						d.num_values.add(tuple1);
+						LOG.info("  ------------------------ after "+tuple1.second);
+						recommerderClient.update_row(name, (String) pcacheArgs.get("predictKey"), d);
+					}
+				}
+			}
+			catch (Exception e) {
+				LOG.error("Collection Exception", e);
+			}
+			LOG.info("Juabtus prob data before returning:"+prob);
+
+		} catch (PCacheException e) {
+			LOG.error("PCache Exception", e);
+		}
+		// return predict result here
+		return prob;
+	}
+
+	private static Datum makeDatumArray(Set<Entry<String, Object>> entries){//,
+	//		double height) {
+		Datum d = new Datum();
+		d.string_values = new ArrayList<TupleStringString>();
+		d.num_values = new ArrayList<TupleStringDouble>();
+		
+		for (Entry<String, Object> entry : entries) {
+			
+			if (!entry.getKey().equalsIgnoreCase("predict_id")) {
+				String k = entry.getKey();
+				Object v = entry.getValue();
+				System.out.println(k+" ************* "+v);
+				d.string_values.add(makeStringTuple(k, String.valueOf(v) ));
+			}
+		}		
+		return d;
+	}
+
+	
+	private static TupleStringString makeStringTuple(String first, String second) {
+		TupleStringString t = new TupleStringString();
+		t.first = (String) first;
+		t.second = (String) second;
+		return t;
+	}
+
+	private static TupleStringDouble makeDoubleTuple(String first, double second) {
+		TupleStringDouble t = new TupleStringDouble();
+		t.first = first;
+		t.second = second;
+		return t;
+	}
+
+}
+
