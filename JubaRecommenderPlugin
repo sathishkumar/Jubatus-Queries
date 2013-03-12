@@ -15,15 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import org.apache.commons.configuration.Configuration;
-import org.apache.log4j.Logger;
-import org.mortbay.log.Log;
-import org.zestadz.adsearch.server.data.CacheDataPlugin;
-
-import com.ms134.pservice.pcache.PCache;
-import com.ms134.pservice.pcache.PCacheException;
-import com.ms134.pservice.pcache.PKey;
-
 import us.jubat.recommender.Datum;
 import us.jubat.recommender.RecommenderClient;
 import us.jubat.recommender.TupleStringDouble;
