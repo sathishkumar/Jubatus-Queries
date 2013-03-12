@@ -1,0 +1,51 @@
+Jubatus-Queries
+===============
+Hi Hido, 
+
+This is raw Data we are putting into hashmap and sent to another class to format as tuples and request Jubatus to predict. 
+We are formatting user request parameters in predictArgs:
+
+  	// Data that we populate in PredictArgs hashMap
+		// #Hour,Day_Id,Region_Id:str,Country_Id:str,Loc_Id,Carrier_Id,Network_Id:str,Device_Id,Os:str,Ad_Id,Brandsafe_Id:str,Ad_Size:str,Impressions,Clicks
+		metrics = adDetail.get("cost_metrics").toString();
+		predictId = predictModel.get(rtbRequest + "_"
+				+ metrics.toUpperCase());
+		Map<String, Object> predictArgs = new HashMap<String, Object>();
+		predictArgs.put("Hour", hourId);
+		predictArgs.put("Day_Id", dayId);
+		predictArgs
+				.put("Region_Id",
+						(regionCode == null || regionCode
+								.isEmpty()) ? "ZZ" : regionCode);
+		predictArgs
+				.put("Country_Id",
+						(countryCode == null || countryCode
+								.isEmpty()) ? "ZZ"
+								: countryCode);
+		predictArgs.put("Loc_Id",
+				(locId == null || locId.isEmpty() || locId
+						.equalsIgnoreCase("NULL")) ? ZERO_INT
+						: Integer.parseInt(locId));
+		predictArgs
+				.put("Carrier_Id",
+						(carrierId == null || carrierId
+								.isEmpty()) ? ZERO_INT
+								: Integer.parseInt(carrierId));
+		predictArgs.put("Network_Id", wifiEnabledId);
+		predictArgs
+				.put("Device_Id",
+						(deviceId == null || deviceId.isEmpty() || deviceId
+								.equalsIgnoreCase("NULL")) ? ZERO_INT
+								: Integer.parseInt(deviceId));
+		// predictArgs.put("Os",
+		// (deviceOsString == null || deviceOsString
+		// .isEmpty()) ? "UNKNOWN"
+		// : deviceOsString);
+		predictArgs.put("Ad_Id",
+				Integer.valueOf(adDetail.get("ad_id")));
+		predictArgs.put("Client_Id", clientId);
+		campaignBrandsafeId = brandsafeMap.get(adDetail
+				.get("brandsafe"));
+		predictArgs.put("Brandsafe_Id", campaignBrandsafeId);
+
+		// Impression:1 and clicks:0
