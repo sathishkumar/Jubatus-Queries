@@ -1,7 +1,7 @@
 PredictArgs hashmap will be sent to this class > method 'loadData' to format and request to jubareommender for weightage
 
 
-package org.zestadz.adsearch.server.predict;
+
 //package us.jubat.example.gender;
 
 import java.io.FileInputStream;
