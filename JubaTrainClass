@@ -1,0 +1,81 @@
+Raw data(responseData) will sent to below code, 
+
+  		final Ad adBuilder = responseData.getAd();
+			getRoute = responseData.getRoute();
+			final Rtb rtb = responseData.getRtb();
+			final int clicks = responseData.getClicks();
+			final int impressions = responseData.getImpressions();
+
+			RecommanderDatum(responseData);  // If we want to train recommerder call this. 
+//			ClassifyDatum(responseData); // If we want to train classifier call this. 
+
+# below are the RecommanderDatum and ClassifyDatum,
+
+  private static Datum trainDatum(int dayId,int adId,int clientId,int predictId,String regionCode,String countryCode,String locId,String remoteIp,String carrierId,String deviceId,String brandsafeId,String wifiId){//,
+	//		double height) {
+
+		Datum d = new Datum();
+		d.string_values = new ArrayList<TupleStringString>();
+		d.num_values = new ArrayList<TupleStringDouble>();
+////		if (new Integer(dayId) instanceof Integer) 
+//			d.num_values.add(makeDoubleTuple("day", dayId));
+////		else
+//			d.string_values.add(makeStringTuple("hair", hair));
+		d.num_values.add(makeDoubleTuple("Day_Id", dayId));
+		d.string_values.add(makeStringTuple("Region_Id", regionCode));
+		d.string_values.add(makeStringTuple("Country_Id", countryCode));
+		d.string_values.add(makeStringTuple("Loc_Id", locId));
+		d.string_values.add(makeStringTuple("Carrier_Id", carrierId));
+		d.string_values.add(makeStringTuple("Network_Id", wifiId));
+		d.string_values.add(makeStringTuple("Device_Id", deviceId));
+		d.num_values.add(makeDoubleTuple("Ad_Id", adId));
+		d.num_values.add(makeDoubleTuple("Client_Id", clientId));
+		d.string_values.add(makeStringTuple("Brandsafe_Id", brandsafeId));
+		d.num_values.add(makeDoubleTuple("predict_id", predictId));
+		d.num_values.add(makeDoubleTuple("impression", 1));
+		d.num_values.add(makeDoubleTuple("click", 0));
+//		d.num_values.add(makeDoubleTuple("day", dayId));
+//		d.string_values.add(makeStringTuple("remoteIp", remoteIp));
+		
+	//	d.num_values.add(makeDoubleTuple("height", height));
+		return d;
+	}	
+
+
+  private static void ClassifyDatum(AdData responseData)
+	{
+		TupleStringDatum trainData = new TupleStringDatum();
+		trainData.first = responseData.getAd().getImpressionId();
+		trainData.second = trainDatum(responseData.getDayId(),responseData.getAd().getId(),responseData.getSite().getClientId(),responseData.getAd().getPredictId(),responseData.getIpinfo().getRegionCode(),
+				responseData.getIpinfo().getCountryCode(),responseData.getIpinfo().getLocId(),responseData.getIpinfo().getRemoteIp(),responseData.getDevice().getCarrierId(),
+				responseData.getDevice().getDeviceId(),responseData.getAd().getBrandsafe(),responseData.getAd().getWifiEnabled());//, height);
+		
+		client.train(jubaclasname, Arrays.asList(trainData));
+	}
+
+	private static void RecommanderDatum(AdData responseData)
+	{
+		StringBuffer JubatusKey = new StringBuffer();
+		JubatusKey.append(responseData.getHour()).append("_").append(responseData.getDayId()).append("_").append(responseData.getIpinfo().getRegionCode()).append("_").append(responseData.getIpinfo().getCountryCode()).append("_").append(responseData.getIpinfo().getLocId()).append("_").append(responseData.getIpinfo().getRemoteIp()).append("_").append(responseData.getDevice().getCarrierId())
+		.append("_").append(responseData.getAd().getWifiEnabled()).append("_").append(responseData.getDevice().getDeviceId()).append("_")
+		.append(responseData.getAd().getId()).append("_").append(responseData.getSite().getClientId()).append("_").append(responseData.getAd().getBrandsafe()).append("_").append(responseData.getAd().getPredictId());
+		
+		recommender.update_row(jubarecname, JubatusKey.toString(), trainDatum(responseData.getDayId(),responseData.getAd().getId(),responseData.getSite().getClientId(),responseData.getAd().getPredictId(),responseData.getIpinfo().getRegionCode(),
+				responseData.getIpinfo().getCountryCode(),responseData.getIpinfo().getLocId(),responseData.getIpinfo().getRemoteIp(),responseData.getDevice().getCarrierId(),
+				responseData.getDevice().getDeviceId(),responseData.getAd().getBrandsafe(),responseData.getAd().getWifiEnabled()));
+	}
+	
+  private static TupleStringString makeStringTuple(String first, String second) {
+		TupleStringString t = new TupleStringString();
+		t.first = first;
+		t.second = second;
+		return t;
+	}
+
+	private static TupleStringDouble makeDoubleTuple(String first, double second) {
+		TupleStringDouble t = new TupleStringDouble();
+		t.first = first;
+		t.second = second;
+		return t;
+	}
+
