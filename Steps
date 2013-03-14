@@ -1,3 +1,5 @@
+IMPRSSIONS:
+----------
 Step1: Getting request from below user request parameter
 Continent:AS, Country:INDIA, Carrier:VODAFONE, Device:IPHONE, site:WEBSITE1, Brandsafe:ADULT, HOUR:12, Date:2013-14-13
 
@@ -18,6 +20,9 @@ train.second= {Continent:AS, Country:INDIA, Carrier:VODAFONE, Device:IPHONE, sit
 
 These step1 to step6 will be repeated for all the request from the user
 
+
+CLICKS:
+------
 Now, lets see how the clicks data send to Jubatus(Not yet intregrated Jubatus with click server)
 
 Step1: We will get a click from the user on impression ad that we served. (this is separate click server we have) With below data, 
