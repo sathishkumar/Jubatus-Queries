@@ -1,0 +1,34 @@
+Step1: Getting request from below user request parameter
+Continent:AS, Country:INDIA, Carrier:VODAFONE, Device:IPHONE, site:WEBSITE1, Brandsafe:ADULT, HOUR:12, Date:2013-14-13
+
+STep2: We will collect top 10 ads which are releavent to this combination. 
+ad1, ad2, ad3, ad4, ad5, ad6, ad7, ad8, ad9
+
+Step3: We will send to Predict to get weightage for all the Ads. 
+
+step4: Choose the best weightaged ad. create a unique impression id and serve that ad to the user
+
+Step5: there will be two async process, 1) will go for billing the advertiser, 2) will write the data into filesystem then it will be compressed and sent to collectors and so on. 
+
+Step6: In 2nd process, we will have a class to train the Jubatus, as below, 
+train.first="impression"
+train.second= {Continent:AS, Country:INDIA, Carrier:VODAFONE, Device:IPHONE, site:WEBSITE1, Brandsafe:ADULT, HOUR:12, Date:2013-14-13}
+
+
+
+These step1 to step6 will be repeated for all the request from the user
+
+Now, lets see how the clicks data send to Jubatus(Not yet intregrated Jubatus with click server)
+
+Step1: We will get a click from the user on impression ad that we served. (this is separate click server we have) With below data, 
+ImpressionID: a2341aj8712123k98as,tracking url:http://test.com,siteid:WEBSITE1
+
+Step2: ImpressionID will have all the details of where this ad has been served with what data combination. get the next action url to redirect the user. 
+
+Step3: redirect the user request to the advetiser url
+
+Step4: there will be two async process, 1) will go for billing the advertiser, 2) will write the data into filesystem then it will be compressed and sent to collectors and so on. 
+
+step5: In 2nd process, we will have a class to train the Jubatus classifier, as below, 
+train.first="clicked"
+train.second= {Continent:AS, Country:INDIA, Carrier:VODAFONE, Device:IPHONE, site:WEBSITE1, Brandsafe:ADULT, HOUR:12, Date:2013-14-13}
